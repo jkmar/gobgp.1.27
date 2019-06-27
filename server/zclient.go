@@ -640,7 +640,7 @@ func (z *zebraClient) loop() {
 				if table.UseMultiplePaths.Enabled {
 					for _, dst := range msg.MultiPathList {
 						if body, isWithdraw := newIPRouteBody(dst, false); body != nil {
-							z.client.SendIPRoute(0, body, isWithdraw)
+							z.client.SendIPRoute(0, body, isWithdraw, true)
 						}
 						if body, isWithdraw := newNexthopRegisterBody(dst, z.nhtManager); body != nil {
 							z.client.SendNexthopRegister(0, body, isWithdraw)
@@ -670,7 +670,7 @@ func (z *zebraClient) loop() {
 								if selfRouteWithdraw {
 									isWithdraw = true
 								}
-								z.client.SendIPRoute(i, body, isWithdraw)
+								z.client.SendIPRoute(i, body, isWithdraw, true)
 							}
 							if body, isWithdraw := newNexthopRegisterBody(pathList{path}, z.nhtManager); body != nil {
 								if selfRouteWithdraw {
@@ -697,7 +697,7 @@ func (z *zebraClient) loop() {
 						}
 					}
 				}
-				for _, path := range msg.PathList {
+				for idx, path := range msg.PathList {
 					if !AddPathEnabled(path) {
 						continue
 					}
@@ -719,9 +719,15 @@ func (z *zebraClient) loop() {
 					if len(vrfs) == 0 {
 						vrfs = append(vrfs, 0)
 					}
+					// Selected flag calculation.
+					isSelected := false
+					if idx == 0 && !path.IsNexthopInvalid {
+						isSelected = true
+					}
+					fmt.Printf("XXX: selected %v\n", isSelected)
 					for _, vrfId := range vrfs {
 						if body, isWithdraw := newIPRouteBody(pathList{path}, false); body != nil {
-							z.client.SendIPRoute(vrfId, body, isWithdraw)
+							z.client.SendIPRoute(vrfId, body, isWithdraw, isSelected)
 						}
 						if body, isWithdraw := newNexthopRegisterBody(pathList{path}, z.nhtManager); body != nil {
 							z.client.SendNexthopRegister(vrfId, body, isWithdraw)
