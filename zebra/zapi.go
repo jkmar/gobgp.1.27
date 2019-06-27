@@ -758,7 +758,7 @@ func (c *Client) SendRedistributeDelete(t ROUTE_TYPE) error {
 	}
 }
 
-func (c *Client) SendIPRoute(vrfId uint16, body *IPRouteBody, isWithdraw bool) error {
+func (c *Client) SendIPRoute(vrfId uint16, body *IPRouteBody, isWithdraw bool, isSelected bool) error {
 	command := IPV4_ROUTE_ADD
 	if c.Version <= 3 {
 		if body.Prefix.To4() != nil {
@@ -786,6 +786,9 @@ func (c *Client) SendIPRoute(vrfId uint16, body *IPRouteBody, isWithdraw bool) e
 				command = FRR_IPV6_ROUTE_ADD
 			}
 		}
+	}
+	if isSelected {
+		body.Flags |= FLAG_REJECT
 	}
 	return c.SendCommand(command, vrfId, body)
 }
