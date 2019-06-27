@@ -547,6 +547,18 @@ func NlriRD(str string) string {
 	return ""
 }
 
+var AddPathForAllPrefix = true
+
+func AddPathEnabled(path *table.Path) bool {
+	if AddPathForAllPrefix {
+		return true
+	}
+	if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {
+		return true
+	}
+	return false
+}
+
 func (z *zebraClient) loop() {
 	w := z.server.Watch([]WatchOption{
 		WatchBestPath(true),
@@ -637,7 +649,7 @@ func (z *zebraClient) loop() {
 				} else {
 					for _, path := range msg.PathList {
 						selfRouteWithdraw := false
-						if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {
+						if AddPathEnabled(path) {
 							continue
 						}
 						if path.IsLocal() {
@@ -686,7 +698,7 @@ func (z *zebraClient) loop() {
 					}
 				}
 				for _, path := range msg.PathList {
-					if NlriPrefix(path.GetNlri().String()) != "0.0.0.0/0" {
+					if !AddPathEnabled(path) {
 						continue
 					}
 					if path.IsLocal() {
