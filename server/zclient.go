@@ -306,14 +306,14 @@ func newIPRouteBody(dst pathList, selfRouteWithdraw bool) (body *zebra.IPRouteBo
 		}
 	}
 	var pathId uint32
-	if plen == 0 {
-		pathId = path.GetNlri().PathLocalIdentifier()
-		if pathId == 0 {
-			log.Warnf("Skipping zero LocalId default route")
-			return nil, false
-		}
-		msgFlags |= zebra.MESSAGE_PATH_ID
+	// if plen == 0 {
+	pathId = path.GetNlri().PathLocalIdentifier()
+	if pathId == 0 {
+		log.Warnf("Skipping zero LocalId default route")
+		return nil, false
 	}
+	msgFlags |= zebra.MESSAGE_PATH_ID
+	// }
 	return &zebra.IPRouteBody{
 		Type:         zebra.ROUTE_BGP,
 		Flags:        flags,
@@ -498,6 +498,7 @@ func (z *zebraClient) SendPaths(paths []*table.Path, vrfs map[string]uint16) {
 	if z.watcher == nil {
 		return
 	}
+	fmt.Println("->WatchEventUpdate[SendPaths]")
 	z.watcher.realCh <- &WatchEventUpdate{
 		PathList: paths,
 		Vrf:      vrfs,
@@ -545,6 +546,15 @@ func NlriRD(str string) string {
 		return fmt.Sprintf("%s:%s", nlri[0], nlri[1])
 	}
 	return ""
+}
+
+func NlriIP(str string) string {
+	ipstr := NlriPrefix(str)
+	_, _, err := net.ParseCIDR(ipstr)
+	if err != nil {
+		return ""
+	}
+	return ipstr
 }
 
 var AddPathForAllPrefix = true
@@ -649,11 +659,11 @@ func (z *zebraClient) loop() {
 				} else {
 					for _, path := range msg.PathList {
 						selfRouteWithdraw := false
-						if AddPathEnabled(path) {
-							continue
-						}
+						// if AddPathEnabled(path) {
+						// 	continue
+						// }
 						if path.IsLocal() {
-							fmt.Println("Make Local Path selection to withdraw event", path.GetNlri().String())
+							// fmt.Println("Make Local Path selection to withdraw event", path.GetNlri().String())
 							selfRouteWithdraw = true
 						}
 						vrfs := []uint16{}
@@ -664,6 +674,15 @@ func (z *zebraClient) loop() {
 						}
 						if len(vrfs) == 0 {
 							vrfs = append(vrfs, 0)
+						}
+						pstr := NlriIP(path.GetNlri().String())
+						if pstr != "" {
+							nhop := path.GetNexthop()
+							withdraw := "selected"
+							if path.IsWithdraw {
+								withdraw = "un-selected"
+							}
+							fmt.Printf("--[B] %s [%d] %s %s\n", pstr, path.GetNlri().PathLocalIdentifier(), nhop.String(), withdraw)
 						}
 						for _, i := range vrfs {
 							if body, isWithdraw := newIPRouteBody(pathList{path}, selfRouteWithdraw); body != nil {
@@ -697,7 +716,7 @@ func (z *zebraClient) loop() {
 						}
 					}
 				}
-				for idx, path := range msg.PathList {
+				for _, path := range msg.PathList {
 					if !AddPathEnabled(path) {
 						continue
 					}
@@ -720,14 +739,18 @@ func (z *zebraClient) loop() {
 						vrfs = append(vrfs, 0)
 					}
 					// Selected flag calculation.
-					isSelected := false
-					if idx == 0 && !path.IsNexthopInvalid {
-						isSelected = true
+					pstr := NlriIP(path.GetNlri().String())
+					if pstr != "" {
+						nhop := path.GetNexthop()
+						withdraw := "reachable"
+						if path.IsWithdraw {
+							withdraw = "withdraw"
+						}
+						fmt.Printf("--[R] %s [%d] %s %s\n", pstr, path.GetNlri().PathLocalIdentifier(), nhop.String(), withdraw)
 					}
-					fmt.Printf("XXX: selected %v\n", isSelected)
 					for _, vrfId := range vrfs {
 						if body, isWithdraw := newIPRouteBody(pathList{path}, false); body != nil {
-							z.client.SendIPRoute(vrfId, body, isWithdraw, isSelected)
+							z.client.SendIPRoute(vrfId, body, isWithdraw, true)
 						}
 						if body, isWithdraw := newNexthopRegisterBody(pathList{path}, z.nhtManager); body != nil {
 							z.client.SendNexthopRegister(vrfId, body, isWithdraw)

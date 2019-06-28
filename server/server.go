@@ -693,6 +693,7 @@ func (server *BgpServer) notifyPrePolicyUpdateWatcher(peer *Peer, pathList []*ta
 		PathList:     cloned,
 		Neighbor:     server.ToConfig(peer, false),
 	}
+	fmt.Println("->WatchEventUpdate[1]")
 	server.notifyWatcher(WATCH_EVENT_TYPE_PRE_UPDATE, ev)
 }
 
@@ -718,6 +719,7 @@ func (server *BgpServer) notifyPostPolicyUpdateWatcher(peer *Peer, pathList []*t
 		PathList:     cloned,
 		Neighbor:     server.ToConfig(peer, false),
 	}
+	//fmt.Println("->WatchEventUpdate[2]")
 	server.notifyWatcher(WATCH_EVENT_TYPE_POST_UPDATE, ev)
 }
 
@@ -2986,6 +2988,7 @@ func (s *BgpServer) Watch(opts ...WatchOption) (w *Watcher) {
 				for _, rf := range peer.configuredRFlist() {
 					_, y := peer.fsm.capMap[bgp.BGP_CAP_FOUR_OCTET_AS_NUMBER]
 					l, _ := peer.fsm.LocalHostPort()
+					fmt.Println("->WatchEventUpdate[3]")
 					w.notify(&WatchEventUpdate{
 						PeerAS:       peer.fsm.peerInfo.AS,
 						LocalAS:      peer.fsm.peerInfo.LocalAS,
@@ -3001,6 +3004,7 @@ func (s *BgpServer) Watch(opts ...WatchOption) (w *Watcher) {
 
 					eor := bgp.NewEndOfRib(rf)
 					eorBuf, _ := eor.Serialize()
+					fmt.Println("->WatchEventUpdate[4]")
 					w.notify(&WatchEventUpdate{
 						Message:      eor,
 						PeerAS:       peer.fsm.peerInfo.AS,
@@ -3034,6 +3038,7 @@ func (s *BgpServer) Watch(opts ...WatchOption) (w *Watcher) {
 						configNeighbor = w.s.ToConfig(peer, false)
 					}
 
+					fmt.Println("->WatchEventUpdate[5]")
 					w.notify(&WatchEventUpdate{
 						PeerAS:      peerInfo.AS,
 						PeerAddress: peerInfo.Address,
@@ -3046,6 +3051,7 @@ func (s *BgpServer) Watch(opts ...WatchOption) (w *Watcher) {
 
 					eor := bgp.NewEndOfRib(rf)
 					eorBuf, _ := eor.Serialize()
+					fmt.Println("->WatchEventUpdate[6]")
 					w.notify(&WatchEventUpdate{
 						Message:     eor,
 						PeerAS:      peerInfo.AS,
