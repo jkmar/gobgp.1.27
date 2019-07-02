@@ -78,7 +78,6 @@ service GobgpApi {
   rpc DeletePolicyAssignment(DeletePolicyAssignmentRequest) returns (DeletePolicyAssignmentResponse) {}
   rpc ReplacePolicyAssignment(ReplacePolicyAssignmentRequest) returns (ReplacePolicyAssignmentResponse) {}
   rpc GetRibInfo(GetRibInfoRequest) returns (GetRibInfoResponse) {}
-  rpc SetLogLevel(SetLogLevelRequest) returns (SetLogLevelResponse) {}
 }
 
 // Constants for address families
@@ -1154,11 +1153,4 @@ message GetRibInfoRequest {
 
 message GetRibInfoResponse {
     TableInfo info = 1;
-}
-
-message SetLogLevelRequest {
-  uint32 level = 1;
-}
-
-message SetLogLevelResponse {
 }

@@ -80,14 +80,6 @@ const (
 	CMD_LARGECOMMUNITY = "large-community"
 	CMD_SUMMARY        = "summary"
 	CMD_VALIDATION     = "validation"
-	CMD_LOGLEVEL       = "log-level"
-	CMD_DEBUG          = "debug"
-	CMD_ERROR          = "error"
-	CMD_FATAL          = "fatal"
-	CMD_INFO           = "info"
-	CMD_PANIC          = "panic"
-	CMD_TRACE          = "trace"
-	CMD_WARN           = "warn"
 )
 
 const (

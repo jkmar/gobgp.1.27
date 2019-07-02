@@ -385,7 +385,6 @@ func NewPeerFromConfigStruct(pconf *config.Neighbor) *Peer {
 }
 
 func (s *Server) GetNeighbor(ctx context.Context, arg *GetNeighborRequest) (*GetNeighborResponse, error) {
-
 	if arg == nil {
 		return nil, fmt.Errorf("invalid request")
 	}
@@ -2422,8 +2421,7 @@ func (s *Server) GetPolicyAssignment(ctx context.Context, arg *GetPolicyAssignme
 		Default:  def,
 		Policies: policies,
 	}
-
-	return &GetPolicyAssignmentResponse{Assignment: NewAPIPolicyAssignmentFromTableStruct(t)}, err
+	return &GetPolicyAssignmentResponse{NewAPIPolicyAssignmentFromTableStruct(t)}, err
 }
 
 func defaultRouteType(d RouteAction) table.RouteType {
@@ -2570,17 +2568,4 @@ func (s *Server) GetRibInfo(ctx context.Context, arg *GetRibInfoRequest) (*GetRi
 		},
 	}, nil
 
-}
-
-func (s *Server) SetLogLevel(ctx context.Context, arg *SetLogLevelRequest) (*SetLogLevelResponse, error) {
-	old := log.GetLevel()
-	new := log.Level(arg.Level)
-	log.SetLevel(new)
-	cur := log.GetLevel()
-	if cur == new {
-		log.Infof("SetLogLevel(): old: %v, new: %v", old, new)
-	} else {
-		log.Errorf("SetLogLevel(): old: %v, new: %v, current: %v", old, new, cur)
-	}
-	return &SetLogLevelResponse{}, nil
 }
