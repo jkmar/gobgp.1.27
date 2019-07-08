@@ -707,6 +707,7 @@ func (server *BgpServer) notifyPostPolicyUpdateWatcher(peer *Peer, pathList []*t
 	}
 	_, y := peer.fsm.capMap[bgp.BGP_CAP_FOUR_OCTET_AS_NUMBER]
 	l, _ := peer.fsm.LocalHostPort()
+	// Here is for post policy event.
 	ev := &WatchEventUpdate{
 		PeerAS:       peer.fsm.peerInfo.AS,
 		LocalAS:      peer.fsm.peerInfo.LocalAS,
@@ -891,6 +892,7 @@ func (server *BgpServer) propagateUpdate(peer *Peer, pathList []*table.Path) {
 		}
 
 		if !rs {
+			// Here is a place for post policy update.
 			server.notifyPostPolicyUpdateWatcher(peer, []*table.Path{path})
 
 			// RFC4684 Constrained Route Distribution 6. Operation
@@ -943,6 +945,7 @@ func (server *BgpServer) propagateUpdate(peer *Peer, pathList []*table.Path) {
 		}
 
 		if dsts := rib.Update(path); len(dsts) > 0 {
+			// Here is best path.
 			server.propagateUpdateToNeighbors(peer, path, dsts, true)
 		}
 	}
@@ -987,6 +990,7 @@ func (server *BgpServer) propagateUpdateToNeighbors(source *Peer, newPath *table
 	var mpathList [][]*table.Path
 	if source == nil || !source.isRouteServerClient() {
 		gBestList, gOldList, mpathList = dstsToPaths(table.GLOBAL_RIB_NAME, 0, dsts)
+		// Here is place for best path update.
 		server.notifyBestWatcher(gBestList, mpathList)
 	}
 	family := newPath.GetRouteFamily()

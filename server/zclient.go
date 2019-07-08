@@ -559,10 +559,7 @@ func NlriIP(str string) string {
 
 var AddPathForAllPrefix = true
 
-func AddPathEnabled(path *table.Path) bool {
-	if AddPathForAllPrefix {
-		return true
-	}
+func AddPathOnly(path *table.Path) bool {
 	if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {
 		return true
 	}
@@ -659,9 +656,9 @@ func (z *zebraClient) loop() {
 				} else {
 					for _, path := range msg.PathList {
 						selfRouteWithdraw := false
-						// if AddPathEnabled(path) {
-						// 	continue
-						// }
+						if AddPathOnly(path) {
+							continue
+						}
 						if path.IsLocal() {
 							// fmt.Println("Make Local Path selection to withdraw event", path.GetNlri().String())
 							selfRouteWithdraw = true
@@ -717,9 +714,6 @@ func (z *zebraClient) loop() {
 					}
 				}
 				for _, path := range msg.PathList {
-					if !AddPathEnabled(path) {
-						continue
-					}
 					if path.IsLocal() {
 						fmt.Println("Skipping Local Path", path.GetNlri().String())
 						continue
