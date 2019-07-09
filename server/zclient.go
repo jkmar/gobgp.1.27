@@ -646,6 +646,9 @@ func (z *zebraClient) loop() {
 			case *WatchEventBestPath:
 				if table.UseMultiplePaths.Enabled {
 					for _, dst := range msg.MultiPathList {
+						for index, path := range dst {
+							fmt.Println("index", index, "path", path)
+						}
 						if body, isWithdraw := newIPRouteBody(dst, false); body != nil {
 							z.client.SendIPRoute(0, body, isWithdraw, true)
 						}
