@@ -627,10 +627,38 @@ func (z *zebraClient) loop() {
 			case *WatchEventBestPath:
 				if table.UseMultiplePaths.Enabled {
 					for _, dst := range msg.MultiPathList {
+						if len(dst) == 0 {
+							return
+						}
+						path := dst[0]
+						selfRouteWithdraw := false
+						if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {
+							return
+						}
+						if path.IsLocal() {
+							fmt.Println("Make Local Path selection to withdraw event", path.GetNlri().String())
+							selfRouteWithdraw = true
+						}
+						var vrf uint16 = 0
+						if msg.Vrf != nil {
+							if v, ok := msg.Vrf[path.GetNlri().String()]; ok {
+								vrf = v
+							}
+						}
+						fmt.Println("vrf", vrf)
+						for index, d := range dst {
+							fmt.Printf("[%d] %v\n", index, d)
+						}
 						if body, isWithdraw := newIPRouteBody(dst, false); body != nil {
+							if selfRouteWithdraw {
+								isWithdraw = true
+							}
 							z.client.SendIPRoute(0, body, isWithdraw)
 						}
 						if body, isWithdraw := newNexthopRegisterBody(dst, z.nhtManager); body != nil {
+							if selfRouteWithdraw {
+								isWithdraw = true
+							}
 							z.client.SendNexthopRegister(0, body, isWithdraw)
 						}
 					}
