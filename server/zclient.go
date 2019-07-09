@@ -547,6 +547,15 @@ func NlriRD(str string) string {
 	return ""
 }
 
+func NlriIP(str string) string {
+	ipstr := NlriPrefix(str)
+	_, _, err := net.ParseCIDR(ipstr)
+	if err != nil {
+		return ""
+	}
+	return ipstr
+}
+
 func (z *zebraClient) loop() {
 	w := z.server.Watch([]WatchOption{
 		WatchBestPath(true),
@@ -646,8 +655,19 @@ func (z *zebraClient) loop() {
 							}
 						}
 						fmt.Println("vrf", vrf)
-						for index, d := range dst {
-							fmt.Printf("[%d] %v\n", index, d)
+						for index, p := range dst {
+							pstr := NlriIP(p.GetNlri().String())
+							if pstr != "" {
+								nhop := p.GetNexthop()
+								withdraw := ""
+								if p.IsWithdraw {
+									withdraw = "withdraw"
+								}
+								if selfRouteWithdraw {
+									withdraw = "self-route withdraw"
+								}
+								fmt.Printf("[%d] %s %s %s\n", index, pstr, nhop.String(), withdraw)
+							}
 						}
 						if body, isWithdraw := newIPRouteBody(dst, false); body != nil {
 							if selfRouteWithdraw {

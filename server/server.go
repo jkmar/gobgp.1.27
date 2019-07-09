@@ -1682,6 +1682,7 @@ func (s *BgpServer) Start(c *config.Global) error {
 		// update route selection options
 		table.SelectionOptions = c.RouteSelectionOptions.Config
 		table.UseMultiplePaths = c.UseMultiplePaths.Config
+		table.UseMultiplePaths.Enabled = true
 
 		s.roaManager.SetAS(s.bgpConfig.Global.Config.As)
 		return nil
