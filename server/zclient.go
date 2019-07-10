@@ -673,13 +673,13 @@ func (z *zebraClient) loop() {
 							if selfRouteWithdraw {
 								isWithdraw = true
 							}
-							z.client.SendIPRoute(0, body, isWithdraw)
+							z.client.SendIPRoute(vrf, body, isWithdraw)
 						}
 						if body, isWithdraw := newNexthopRegisterBody(dst, z.nhtManager); body != nil {
 							if selfRouteWithdraw {
 								isWithdraw = true
 							}
-							z.client.SendNexthopRegister(0, body, isWithdraw)
+							z.client.SendNexthopRegister(vrf, body, isWithdraw)
 						}
 					}
 				} else {
