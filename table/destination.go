@@ -560,16 +560,9 @@ type Update struct {
 
 func getMultiBestPath(id string, pathList []*Path) []*Path {
 	list := make([]*Path, 0, len(pathList))
-	//var best *Path
 	for _, p := range pathList {
 		if !p.IsNexthopInvalid {
 			list = append(list, p)
-			// if best == nil {
-			// 	best = p
-			// 	list = append(list, p)
-			// } else if best.Compare2(p) == 0 {
-			// 	list = append(list, p)
-			// }
 		}
 	}
 	return list
