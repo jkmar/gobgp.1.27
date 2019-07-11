@@ -756,8 +756,6 @@ func (z *zebraClient) loop() {
 					if len(vrfs) == 0 {
 						vrfs = append(vrfs, 0)
 					}
-					nhop := path.GetNexthop()
-					fmt.Println(path.GetNlri().String(), "->", nhop.String())
 					for _, vrfId := range vrfs {
 						if body, isWithdraw := newIPRouteBody(pathList{path}, false); body != nil {
 							z.client.SendIPRoute(vrfId, body, isWithdraw)
