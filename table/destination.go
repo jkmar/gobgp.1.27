@@ -638,16 +638,15 @@ func (u *Update) GetChanges(id string, as uint32, peerDown bool) (*Path, *Path, 
 
 	if id == GLOBAL_RIB_NAME && UseMultiplePaths.Enabled {
 		diff := func(lhs, rhs []*Path) bool {
-			// if len(lhs) != len(rhs) {
-			// 	return true
-			// }
-			// for idx, l := range lhs {
-			// 	if !l.Equal(rhs[idx]) {
-			// 		return true
-			// 	}
-			// }
-			// return false
-			return true
+			if len(lhs) != len(rhs) {
+				return true
+			}
+			for idx, l := range lhs {
+				if !l.Equal(rhs[idx]) {
+					return true
+				}
+			}
+			return false
 		}
 		oldM := getMultiBestPath(id, u.OldKnownPathList)
 		newM := getMultiBestPath(id, u.KnownPathList)
