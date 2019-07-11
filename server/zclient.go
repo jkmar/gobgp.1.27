@@ -638,13 +638,12 @@ func (z *zebraClient) loop() {
 					fmt.Println("MultiplePathList", len(msg.MultiPathList), "PathList", len(msg.PathList))
 					for _, dst := range msg.MultiPathList {
 						if len(dst) == 0 {
-							fmt.Println("Empty dst")
-							return
+							continue
 						}
 						path := dst[0]
 						selfRouteWithdraw := false
 						if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {
-							return
+							continue
 						}
 						if path.IsLocal() {
 							fmt.Println("Make Local Path selection to withdraw event", path.GetNlri().String())
@@ -669,8 +668,6 @@ func (z *zebraClient) loop() {
 									withdraw = "self-route withdraw"
 								}
 								fmt.Printf("vrf %d [%d] %s %s %s\n", vrf, index, pstr, nhop.String(), withdraw)
-							} else {
-								fmt.Printf("vrf %d [%d] %s (can't parse CIDR)\n", vrf, index, p.GetNlri().String())
 							}
 						}
 						if body, isWithdraw := newIPRouteBody(dst, false); body != nil {
@@ -687,7 +684,6 @@ func (z *zebraClient) loop() {
 						}
 					}
 				} else {
-					fmt.Println("XXX Multipath disabled table")
 					for _, path := range msg.PathList {
 						selfRouteWithdraw := false
 						if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {
@@ -760,6 +756,8 @@ func (z *zebraClient) loop() {
 					if len(vrfs) == 0 {
 						vrfs = append(vrfs, 0)
 					}
+					nhop := path.GetNexthop()
+					fmt.Println(path.GetNlri().String(), "->", nhop.String())
 					for _, vrfId := range vrfs {
 						if body, isWithdraw := newIPRouteBody(pathList{path}, false); body != nil {
 							z.client.SendIPRoute(vrfId, body, isWithdraw)
