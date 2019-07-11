@@ -635,8 +635,10 @@ func (z *zebraClient) loop() {
 			switch msg := ev.(type) {
 			case *WatchEventBestPath:
 				if table.UseMultiplePaths.Enabled {
+					fmt.Println("MultiplePathList", len(msg.MultiPathList), "PathList", len(msg.PathList))
 					for _, dst := range msg.MultiPathList {
 						if len(dst) == 0 {
+							fmt.Println("Empty dst")
 							return
 						}
 						path := dst[0]
@@ -649,13 +651,13 @@ func (z *zebraClient) loop() {
 							selfRouteWithdraw = true
 						}
 						var vrf uint16 = 0
-						if msg.Vrf != nil {
-							if v, ok := msg.Vrf[path.GetNlri().String()]; ok {
-								vrf = v
-							}
-						}
-						fmt.Println("vrf", vrf)
+						fmt.Println("dst-len", len(dst), "msg.Vrf", msg.Vrf)
 						for index, p := range dst {
+							if msg.Vrf != nil && vrf == 0 {
+								if v, ok := msg.Vrf[p.GetNlri().String()]; ok {
+									vrf = v
+								}
+							}
 							pstr := NlriIP(p.GetNlri().String())
 							if pstr != "" {
 								nhop := p.GetNexthop()
@@ -666,7 +668,9 @@ func (z *zebraClient) loop() {
 								if selfRouteWithdraw {
 									withdraw = "self-route withdraw"
 								}
-								fmt.Printf("[%d] %s %s %s\n", index, pstr, nhop.String(), withdraw)
+								fmt.Printf("vrf %d [%d] %s %s %s\n", vrf, index, pstr, nhop.String(), withdraw)
+							} else {
+								fmt.Printf("vrf %d [%d] %s (can't parse CIDR)\n", vrf, index, p.GetNlri().String())
 							}
 						}
 						if body, isWithdraw := newIPRouteBody(dst, false); body != nil {
@@ -683,6 +687,7 @@ func (z *zebraClient) loop() {
 						}
 					}
 				} else {
+					fmt.Println("XXX Multipath disabled table")
 					for _, path := range msg.PathList {
 						selfRouteWithdraw := false
 						if NlriPrefix(path.GetNlri().String()) == "0.0.0.0/0" {

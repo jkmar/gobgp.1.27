@@ -600,12 +600,29 @@ func (server *BgpServer) notifyBestWatcher(best []*table.Path, multipath [][]*ta
 	}
 	clonedB := clonePathList(best)
 	m := make(map[string]uint16)
+	fmt.Println("clonePathList num", len(clonedB))
 	for _, p := range clonedB {
 		switch p.GetRouteFamily() {
 		case bgp.RF_IPv4_VPN, bgp.RF_IPv6_VPN:
 			for _, vrf := range server.globalRib.Vrfs {
 				if vrf.Id != 0 && table.CanImportToVrf(vrf, p) {
+					fmt.Println("vrf.Id", vrf.Id)
 					m[p.GetNlri().String()] = uint16(vrf.Id)
+				}
+			}
+		}
+	}
+	if len(clonedB) == 0 {
+		for _, pp := range clonedM {
+			for _, p := range pp {
+				switch p.GetRouteFamily() {
+				case bgp.RF_IPv4_VPN, bgp.RF_IPv6_VPN:
+					for _, vrf := range server.globalRib.Vrfs {
+						if vrf.Id != 0 && table.CanImportToVrf(vrf, p) {
+							fmt.Println("vrf.Id", vrf.Id)
+							m[p.GetNlri().String()] = uint16(vrf.Id)
+						}
+					}
 				}
 			}
 		}

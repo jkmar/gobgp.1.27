@@ -560,15 +560,16 @@ type Update struct {
 
 func getMultiBestPath(id string, pathList []*Path) []*Path {
 	list := make([]*Path, 0, len(pathList))
-	var best *Path
+	//var best *Path
 	for _, p := range pathList {
 		if !p.IsNexthopInvalid {
-			if best == nil {
-				best = p
-				list = append(list, p)
-			} else if best.Compare(p) == 0 {
-				list = append(list, p)
-			}
+			list = append(list, p)
+			// if best == nil {
+			// 	best = p
+			// 	list = append(list, p)
+			// } else if best.Compare2(p) == 0 {
+			// 	list = append(list, p)
+			// }
 		}
 	}
 	return list
@@ -637,15 +638,16 @@ func (u *Update) GetChanges(id string, as uint32, peerDown bool) (*Path, *Path, 
 
 	if id == GLOBAL_RIB_NAME && UseMultiplePaths.Enabled {
 		diff := func(lhs, rhs []*Path) bool {
-			if len(lhs) != len(rhs) {
-				return true
-			}
-			for idx, l := range lhs {
-				if !l.Equal(rhs[idx]) {
-					return true
-				}
-			}
-			return false
+			// if len(lhs) != len(rhs) {
+			// 	return true
+			// }
+			// for idx, l := range lhs {
+			// 	if !l.Equal(rhs[idx]) {
+			// 		return true
+			// 	}
+			// }
+			// return false
+			return true
 		}
 		oldM := getMultiBestPath(id, u.OldKnownPathList)
 		newM := getMultiBestPath(id, u.KnownPathList)
