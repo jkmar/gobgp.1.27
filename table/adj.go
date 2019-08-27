@@ -53,6 +53,7 @@ func (adj *AdjRib) Update(pathList []*Path) {
 					adj.accepted[rf]--
 				}
 			}
+			path.SetDropped(true)
 		} else {
 			if found {
 				if old.IsAsLooped() && !path.IsAsLooped() {
@@ -125,7 +126,9 @@ func (adj *AdjRib) DropStale(rfList []bgp.RouteFamily) []*Path {
 					if !p.IsAsLooped() {
 						adj.accepted[rf]--
 					}
-					pathList = append(pathList, p.Clone(true))
+					w := p.Clone(true)
+					w.SetDropped(true)
+					pathList = append(pathList, w)
 				}
 			}
 		}

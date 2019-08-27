@@ -276,7 +276,7 @@ func (dest *Destination) Calculate(newPath *Path) *Update {
 
 	if newPath.IsWithdraw {
 		p := dest.explicitWithdraw(newPath)
-		if p != nil {
+		if p != nil && newPath.IsDropped() {
 			if id := p.GetNlri().PathLocalIdentifier(); id != 0 {
 				log.WithFields(log.Fields{
 					"Topic":    "Withdraw PathId",

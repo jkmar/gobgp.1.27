@@ -17,6 +17,7 @@ package table
 
 import (
 	"fmt"
+	"math/bits"
 	"net"
 	"sort"
 	"strings"
@@ -127,6 +128,13 @@ func (t *Table) deleteDestByNlri(nlri bgp.AddrPrefixInterface) *Destination {
 }
 
 func (t *Table) deleteDest(dest *Destination) {
+	count := 0
+	for _, v := range dest.localIdMap.bitmap {
+		count += bits.OnesCount64(v)
+	}
+	if len(dest.localIdMap.bitmap) != 0 && count != 1 {
+		return
+	}
 	destinations := t.GetDestinations()
 	delete(destinations, t.tableKey(dest.GetNlri()))
 	if len(destinations) == 0 {
