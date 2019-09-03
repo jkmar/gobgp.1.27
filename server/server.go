@@ -954,6 +954,7 @@ func (server *BgpServer) dropPeerAllRoutes(peer *Peer, families []bgp.RouteFamil
 	for _, family := range peer.toGlobalFamilies(families) {
 		for _, path := range rib.GetPathListByPeer(peer.fsm.peerInfo, family) {
 			p := path.Clone(true)
+			p.SetDropped(true)
 			if dsts := rib.Update(p); len(dsts) > 0 {
 				server.propagateUpdateToNeighbors(peer, p, dsts, false)
 			}
