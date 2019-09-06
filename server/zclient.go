@@ -566,7 +566,8 @@ func (z *zebraClient) loop() {
 			return
 		}
 
-		for _, vrf := range z.server.globalRib.Vrfs {
+		globalVrfs := z.server.GetVrf()
+		for _, vrf := range globalVrfs {
 			tbl, _ := z.server.globalRib.FetchExistingVrf(vrf.Name)
 			if tbl != nil {
 				for _, dst := range tbl.GetDestinations() {
@@ -677,7 +678,8 @@ func (z *zebraClient) loop() {
 					for _, p := range msg.PathList {
 						switch p.GetRouteFamily() {
 						case bgp.RF_IPv4_VPN, bgp.RF_IPv6_VPN:
-							for _, vrf := range z.server.globalRib.Vrfs {
+							globalVrfs := z.server.GetVrf()
+							for _, vrf := range globalVrfs {
 								if vrf.Id != 0 && table.CanImportToVrf(vrf, p) {
 									m[p.GetNlri().String()] = uint16(vrf.Id)
 								}
@@ -698,7 +700,8 @@ func (z *zebraClient) loop() {
 						vrfs = append(vrfs, v)
 					}
 					if len(vrfs) == 0 {
-						for _, vrf := range z.server.globalRib.Vrfs {
+						globalVrfs := z.server.GetVrf()
+						for _, vrf := range globalVrfs {
 							if NlriRD(path.GetNlri().String()) == vrf.Rd.String() {
 								vrfs = append(vrfs, uint16(vrf.Id))
 							}
