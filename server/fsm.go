@@ -335,7 +335,7 @@ func (fsm *FSM) connectLoop() error {
 			log.WithFields(log.Fields{
 				"Topic": "Peer",
 				"Key":   fsm.pConf.State.NeighborAddress,
-			}).Warn("failed to resolve local address: %s", err)
+			}).Warnf("failed to resolve local address: %s", err)
 			return
 		}
 		var conn net.Conn
@@ -1622,7 +1622,7 @@ func (h *FSMHandler) loop() error {
 	}
 
 	e := time.AfterFunc(time.Second*120, func() {
-		log.WithFields(log.Fields{"Topic": "Peer"}).Warn("failed to free the fsm.h.t for %s %s %s", fsm.pConf.State.NeighborAddress, oldState, nextState)
+		log.WithFields(log.Fields{"Topic": "Peer"}).Warnf("failed to free the fsm.h.t for %s %s %s", fsm.pConf.State.NeighborAddress, oldState, nextState)
 	})
 	h.t.Wait()
 	e.Stop()
