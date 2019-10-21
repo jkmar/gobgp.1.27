@@ -2475,7 +2475,7 @@ func (s *BgpServer) DisableNeighbor(addr, communication string) error {
 func (s *BgpServer) GetDefinedSet(typ table.DefinedType, name string) (sets *config.DefinedSets, err error) {
 	err = s.mgmtOperation(func() error {
 		sets, err = s.policy.GetDefinedSet(typ, name)
-		return nil
+		return err
 	}, false)
 	return sets, err
 }

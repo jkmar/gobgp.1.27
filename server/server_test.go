@@ -16,6 +16,7 @@
 package server
 
 import (
+	"fmt"
 	"net"
 	"runtime"
 	"testing"
@@ -727,4 +728,21 @@ func TestWatchPreProcess(t *testing.T) {
 	assert.Equal(t, ev, T{x: 1})
 	w.ch.Close()
 	<-done
+}
+
+func TestBgpServerGetDefinedSetPropagateError(t *testing.T) {
+	mgmtCh := make(chan *mgmtOp)
+	const typ = table.DEFINED_TYPE_AS_PATH
+	s := &BgpServer{
+		mgmtCh: mgmtCh,
+		policy: &table.RoutingPolicy{},
+	}
+	go func() {
+		op := <-mgmtCh
+		s.handleMGMTOp(op)
+	}()
+	_, err := s.GetDefinedSet(typ, "")
+	close(mgmtCh)
+	assert.Error(t, err)
+	assert.Equal(t, err, fmt.Errorf("invalid defined-set type: %d", typ))
 }
